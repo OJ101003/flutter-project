@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:now_me/column_demo.dart';
 
 void main() {
   runApp(const MyApp());
@@ -49,16 +50,36 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-                'This is some other text for page 1'
+            const SizedBox(
+              width: 300,
+              height: 100,
+              child: Image(
+                image: NetworkImage('https://upload.wikimedia.org/wikipedia/en/b/bd/Random_App_Logo.png')
+              ),
             ),
-            const Text(
-              'You have pushed the button this many times:',
+            Container(
+              width: 250,
+              margin: const EdgeInsets.all(20),
+              color: Colors.blueGrey,
+              alignment: Alignment.center,
+              child: const Text(
+                  'This is some other text for page 1'
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.only(top: 10, bottom: 30),
+              color: Colors.amber,
+              child: const Text(
+                'You have pushed the button this many times:',
+              ),
             ),
             Text(
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
+            FilledButton(onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const ColumnDemoPage()));
+            } , child: const Text("Next Page"),)
           ],
         ),
       ),
