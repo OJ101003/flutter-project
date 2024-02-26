@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:now_me/column_demo.dart';
+import 'package:now_me/login_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -78,7 +78,7 @@ class _MyHomePageState extends State<MyHomePage> {
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             FilledButton(onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const ColumnDemoPage()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()));
             } , child: const Text("Next Page"),)
           ],
         ),
