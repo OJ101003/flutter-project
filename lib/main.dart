@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:now_me/add_friend.dart';
 import 'package:now_me/profile_page.dart';
+import 'package:now_me/login_page.dart';
+import 'package:now_me/register_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,12 +15,17 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'NowMe',
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const LoginPage(),
+        '/register': (context) => const RegisterPage(),
+        '/main': (context) => const MyHomePage(),
+      },
       theme: ThemeData(
           colorScheme:
               ColorScheme.fromSeed(seedColor: Colors.deepPurple.shade900),
           useMaterial3: true,
           scaffoldBackgroundColor: const Color(0xFF4E4E4E)),
-      home: const MyHomePage(),
     );
   }
 }
