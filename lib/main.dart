@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:now_me/add_friend.dart';
 import 'package:now_me/profile_page.dart';
 
 void main() {
@@ -30,7 +31,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   var selectedIndex = 0;
 
   @override
@@ -158,7 +158,13 @@ class MainPage extends StatelessWidget {
               ),
               Expanded(
                 child: RawMaterialButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    // Handle the button press
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const AddFriend()));
+                  },
                   elevation: 2.0,
                   fillColor: Colors.blueGrey,
                   padding: const EdgeInsets.all(20.0),

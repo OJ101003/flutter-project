@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:now_me/create_status.dart';
+import 'package:now_me/edit_profile.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -61,6 +62,12 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     ElevatedButton(
                       onPressed: () {
+                        // Change page to edit profile
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const EditProfile()),
+                        );
                         // Handle the button press
                       },
                       style: ElevatedButton.styleFrom(

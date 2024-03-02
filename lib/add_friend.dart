@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-
-class CreateStatus extends StatefulWidget {
-  const CreateStatus({super.key});
+class AddFriend extends StatefulWidget {
+  const AddFriend({super.key});
 
   @override
-  State<CreateStatus> createState() => _CreateStatusState();
+  State<AddFriend> createState() => _AddFriendState();
 }
 
-class _CreateStatusState extends State<CreateStatus> {
+class _AddFriendState extends State<AddFriend> {
   @override
   Widget build(BuildContext context) {
     var outlineInputBorder = OutlineInputBorder(
@@ -18,7 +17,7 @@ class _CreateStatusState extends State<CreateStatus> {
         color: Colors.black,
         // Border color, use same as border color
         width:
-            5.0, // This is the width of the border when the TextField is enabled but not focused
+        5.0, // This is the width of the border when the TextField is enabled but not focused
       ),
     );
     return Scaffold(
@@ -38,7 +37,7 @@ class _CreateStatusState extends State<CreateStatus> {
           ),
         ),
         title: const Text(
-          'Create Status',
+          'Add Friends',
           style: TextStyle(
               color: Colors.black, fontWeight: FontWeight.bold, fontSize: 24),
         ),
@@ -50,35 +49,35 @@ class _CreateStatusState extends State<CreateStatus> {
             children: [
               Expanded(
                   child: (Container(
-                margin: const EdgeInsets.only(top: 20),
-                padding:
+                    margin: const EdgeInsets.only(top: 20),
+                    padding:
                     const EdgeInsets.symmetric(horizontal: 10.0, vertical: 20),
-                // Add padding around the text field if needed
-                child: TextField(
-                  style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black),
-                  textAlign: TextAlign.center,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.grey[300],
-                    // Background color of the text field
-                    hintText: 'Enter Status Name',
-                    hintStyle: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black),
-                    // Placeholder text
-                    border: outlineInputBorder,
-                    enabledBorder: outlineInputBorder,
-                    focusedBorder: outlineInputBorder,
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 25.0,
-                        vertical: 25.0), // Padding inside the text field
-                  ),
-                ),
-              )))
+                    // Add padding around the text field if needed
+                    child: TextField(
+                      style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black),
+                      textAlign: TextAlign.center,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.grey[300],
+                        // Background color of the text field
+                        hintText: 'Enter Friend Username',
+                        hintStyle: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black),
+                        // Placeholder text
+                        border: outlineInputBorder,
+                        enabledBorder: outlineInputBorder,
+                        focusedBorder: outlineInputBorder,
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 25.0,
+                            vertical: 25.0), // Padding inside the text field
+                      ),
+                    ),
+                  )))
             ],
           ),
           Column(
@@ -105,7 +104,7 @@ class _CreateStatusState extends State<CreateStatus> {
                       vertical: 10), // Inner padding of the button
                 ),
                 child: const Text(
-                  'Create Status',
+                  'Add Friend',
                   style: TextStyle(
                     fontSize: 25, // Set the font size
                     fontWeight: FontWeight.bold, // Set the font weight
