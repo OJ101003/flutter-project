@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:now_me/create_status.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -99,7 +100,10 @@ class _ProfilePageState extends State<ProfilePage> {
             children: [
               ElevatedButton(
                 onPressed: () {
-                  // Handle the button press
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const CreateStatus()),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF6452AE),
