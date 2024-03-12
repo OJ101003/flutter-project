@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "77441311364",
+    "project_id": "nowme-7c835",
+    "storage_bucket": "nowme-7c835.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:77441311364:android:f274036179477769dc98d1",
+        "android_client_info": {
+          "package_name": "com.example.now_me.now_me"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBsaJsLR4M-cNvXzvRPO1QtxifhPM8zbe8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
