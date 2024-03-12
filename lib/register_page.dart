@@ -62,6 +62,15 @@ class _RegisterPageState extends State<RegisterPage> {
                           )))
                     ],
                   ),
+                  Row(children: [
+                    Expanded(
+                        child: (Container(
+                          margin: const EdgeInsets.only(
+                              bottom: 10, left: 10, right: 10),
+                          // Add padding around the text field if needed
+                          child: EmailTextField(outlineInputBorder: outlineInputBorder),
+                        )))
+                  ],),
                   Row(
                     children: [
                       Expanded(
@@ -174,6 +183,44 @@ class PasswordTextField extends StatelessWidget {
         fillColor: Colors.grey[300],
         // Background color of the text field
         hintText: confirmText,
+        hintStyle: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.black),
+        // Placeholder text
+        border: outlineInputBorder,
+        enabledBorder: outlineInputBorder,
+        focusedBorder: outlineInputBorder,
+        contentPadding: const EdgeInsets.symmetric(
+            horizontal: 25.0,
+            vertical:
+            25.0), // Padding inside the text field
+      ),
+    );
+  }
+}
+
+class EmailTextField extends StatelessWidget {
+  const EmailTextField({
+    super.key,
+    required this.outlineInputBorder,
+  });
+
+  final OutlineInputBorder outlineInputBorder;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      style: const TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: Colors.black),
+      textAlign: TextAlign.center,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.grey[300],
+        // Background color of the text field
+        hintText: 'Email',
         hintStyle: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,

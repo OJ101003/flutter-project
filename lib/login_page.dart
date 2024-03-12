@@ -246,7 +246,7 @@ class UsernameTextField extends StatelessWidget {
         filled: true,
         fillColor: Colors.grey[300],
         // Background color of the text field
-        hintText: 'Username',
+        hintText: 'Email',
         hintStyle: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
