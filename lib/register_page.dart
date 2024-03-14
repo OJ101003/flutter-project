@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
@@ -10,14 +12,14 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     var outlineInputBorder = OutlineInputBorder(
-      // This is for the input border since the code was repetitive
+        // This is for the input border since the code was repetitive
         borderRadius: BorderRadius.circular(10.0),
         // Rounded corners
         borderSide: const BorderSide(
           color: Colors.black,
           // Border color, use same as border color
           width:
-          5.0, // This is the width of the border when the TextField is enabled but not focused
+              5.0, // This is the width of the border when the TextField is enabled but not focused
         ));
     return Scaffold(
         resizeToAvoidBottomInset: false,
@@ -55,46 +57,54 @@ class _RegisterPageState extends State<RegisterPage> {
                     children: [
                       Expanded(
                           child: (Container(
-                            margin: const EdgeInsets.only(
-                                bottom: 10, left: 10, right: 10),
-                            // Add padding around the text field if needed
-                            child: UsernameTextField(outlineInputBorder: outlineInputBorder),
-                          )))
-                    ],
-                  ),
-                  Row(children: [
-                    Expanded(
-                        child: (Container(
-                          margin: const EdgeInsets.only(
-                              bottom: 10, left: 10, right: 10),
-                          // Add padding around the text field if needed
-                          child: EmailTextField(outlineInputBorder: outlineInputBorder),
-                        )))
-                  ],),
-                  Row(
-                    children: [
-                      Expanded(
-                          child: (Container(
-                            margin: const EdgeInsets.only(left: 10, right: 10),
-                            // Add padding around the text field if needed
-                            child: PasswordTextField(outlineInputBorder: outlineInputBorder, confirmText: "Password"),
-                          )))
+                        margin: const EdgeInsets.only(
+                            bottom: 10, left: 10, right: 10),
+                        // Add padding around the text field if needed
+                        child: UsernameTextField(
+                            outlineInputBorder: outlineInputBorder),
+                      )))
                     ],
                   ),
                   Row(
                     children: [
                       Expanded(
                           child: (Container(
-                            margin: const EdgeInsets.only(top: 10,left: 10, right: 10),
-                            // Add padding around the text field if needed
-                            child: PasswordTextField(outlineInputBorder: outlineInputBorder, confirmText: "Confirm Password"),
-                          )))
+                        margin: const EdgeInsets.only(
+                            bottom: 10, left: 10, right: 10),
+                        // Add padding around the text field if needed
+                        child: EmailTextField(
+                            outlineInputBorder: outlineInputBorder),
+                      )))
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                          child: (Container(
+                        margin: const EdgeInsets.only(left: 10, right: 10),
+                        // Add padding around the text field if needed
+                        child: PasswordTextField(
+                            outlineInputBorder: outlineInputBorder,
+                            confirmText: "Password"),
+                      )))
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                          child: (Container(
+                        margin:
+                            const EdgeInsets.only(top: 10, left: 10, right: 10),
+                        // Add padding around the text field if needed
+                        child: PasswordTextField(
+                            outlineInputBorder: outlineInputBorder,
+                            confirmText: "Confirm Password"),
+                      )))
                     ],
                   ),
                 ],
               ),
             ),
-
             const Expanded(
               child: Align(
                 alignment: Alignment.topCenter,
@@ -128,8 +138,7 @@ class CreateAccountButton extends StatelessWidget {
         Navigator.pushNamed(context, '/main');
       },
       style: ElevatedButton.styleFrom(
-        side:
-        const BorderSide(width: 4, color: Colors.black),
+        side: const BorderSide(width: 4, color: Colors.black),
         backgroundColor: const Color(0xFF6452AE),
         // Button background color
         foregroundColor: Colors.white,
@@ -137,21 +146,18 @@ class CreateAccountButton extends StatelessWidget {
         elevation: 3,
         // Button shadow elevation
         shape: RoundedRectangleBorder(
-          borderRadius:
-          BorderRadius.circular(15), // Rounded shape
+          borderRadius: BorderRadius.circular(15), // Rounded shape
         ),
         minimumSize: const Size(330, 90.0),
         // Set the button's minimum size
         padding: const EdgeInsets.symmetric(
-            horizontal: 25,
-            vertical: 10), // Inner padding of the button
+            horizontal: 25, vertical: 10), // Inner padding of the button
       ),
       child: const Text(
         'Create Account',
         style: TextStyle(
           fontSize: 25, // Set the font size
-          fontWeight:
-          FontWeight.bold, // Set the font weight
+          fontWeight: FontWeight.bold, // Set the font weight
         ),
       ),
     );
@@ -161,11 +167,10 @@ class CreateAccountButton extends StatelessWidget {
 class PasswordTextField extends StatelessWidget {
   final String confirmText;
 
-  const PasswordTextField({
-    super.key,
-    required this.outlineInputBorder,
-    this.confirmText = "Password"
-  });
+  const PasswordTextField(
+      {super.key,
+      required this.outlineInputBorder,
+      this.confirmText = "Password"});
 
   final OutlineInputBorder outlineInputBorder;
 
@@ -174,9 +179,7 @@ class PasswordTextField extends StatelessWidget {
     return TextField(
       obscureText: true,
       style: const TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-          color: Colors.black),
+          fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
       textAlign: TextAlign.center,
       decoration: InputDecoration(
         filled: true,
@@ -184,17 +187,13 @@ class PasswordTextField extends StatelessWidget {
         // Background color of the text field
         hintText: confirmText,
         hintStyle: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black),
+            fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
         // Placeholder text
         border: outlineInputBorder,
         enabledBorder: outlineInputBorder,
         focusedBorder: outlineInputBorder,
         contentPadding: const EdgeInsets.symmetric(
-            horizontal: 25.0,
-            vertical:
-            25.0), // Padding inside the text field
+            horizontal: 25.0, vertical: 25.0), // Padding inside the text field
       ),
     );
   }
@@ -212,9 +211,7 @@ class EmailTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextField(
       style: const TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-          color: Colors.black),
+          fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
       textAlign: TextAlign.center,
       decoration: InputDecoration(
         filled: true,
@@ -222,17 +219,13 @@ class EmailTextField extends StatelessWidget {
         // Background color of the text field
         hintText: 'Email',
         hintStyle: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black),
+            fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
         // Placeholder text
         border: outlineInputBorder,
         enabledBorder: outlineInputBorder,
         focusedBorder: outlineInputBorder,
         contentPadding: const EdgeInsets.symmetric(
-            horizontal: 25.0,
-            vertical:
-            25.0), // Padding inside the text field
+            horizontal: 25.0, vertical: 25.0), // Padding inside the text field
       ),
     );
   }
@@ -250,9 +243,7 @@ class UsernameTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextField(
       style: const TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-          color: Colors.black),
+          fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
       textAlign: TextAlign.center,
       decoration: InputDecoration(
         filled: true,
@@ -260,19 +251,14 @@ class UsernameTextField extends StatelessWidget {
         // Background color of the text field
         hintText: 'Username',
         hintStyle: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black),
+            fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
         // Placeholder text
         border: outlineInputBorder,
         enabledBorder: outlineInputBorder,
         focusedBorder: outlineInputBorder,
         contentPadding: const EdgeInsets.symmetric(
-            horizontal: 25.0,
-            vertical:
-            25.0), // Padding inside the text field
+            horizontal: 25.0, vertical: 25.0), // Padding inside the text field
       ),
     );
   }
 }
-
