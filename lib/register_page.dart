@@ -9,6 +9,15 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  String email = "";
+  String password = "";
+
+  void updateEmail(String newEmail) {
+    setState(() {
+      email = newEmail;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var outlineInputBorder = OutlineInputBorder(
@@ -21,6 +30,7 @@ class _RegisterPageState extends State<RegisterPage> {
           width:
               5.0, // This is the width of the border when the TextField is enabled but not focused
         ));
+
     return Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
@@ -73,7 +83,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             bottom: 10, left: 10, right: 10),
                         // Add padding around the text field if needed
                         child: EmailTextField(
-                            outlineInputBorder: outlineInputBorder),
+                            outlineInputBorder: outlineInputBorder, onEmailChange: updateEmail,),
                       )))
                     ],
                   ),
@@ -105,7 +115,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ],
               ),
             ),
-            const Expanded(
+            Expanded(
               child: Align(
                 alignment: Alignment.topCenter,
                 child: Column(
@@ -114,7 +124,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       // Register button
                       children: [
-                        CreateAccountButton(),
+                        CreateAccountButton(email: email),
                       ],
                     ),
                   ],
@@ -127,15 +137,20 @@ class _RegisterPageState extends State<RegisterPage> {
 }
 
 class CreateAccountButton extends StatelessWidget {
+  final String email;
+
   const CreateAccountButton({
     super.key,
+    required this.email,
   });
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: () {
-        Navigator.pushNamed(context, '/main');
+        FirebaseAuth.instance.createUserWithEmailAndPassword(
+            email: email, password: "password");
+        // Navigator.pushNamed(context, '/main');
       },
       style: ElevatedButton.styleFrom(
         side: const BorderSide(width: 4, color: Colors.black),
@@ -200,9 +215,12 @@ class PasswordTextField extends StatelessWidget {
 }
 
 class EmailTextField extends StatelessWidget {
+  final Function(String) onEmailChange;
+
   const EmailTextField({
     super.key,
     required this.outlineInputBorder,
+    required this.onEmailChange,
   });
 
   final OutlineInputBorder outlineInputBorder;
@@ -210,6 +228,9 @@ class EmailTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      onChanged: (text) {
+        onEmailChange(text);
+      },
       style: const TextStyle(
           fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
       textAlign: TextAlign.center,
