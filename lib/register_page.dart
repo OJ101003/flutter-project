@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -11,11 +12,35 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   String email = "";
   String password = "";
+  String confirmPassword = "";
+  String username = "";
+
+  void updateUsername(String newUsername) {
+    setState(() {
+      username = newUsername;
+    });
+  }
 
   void updateEmail(String newEmail) {
     setState(() {
       email = newEmail;
     });
+  }
+
+  void updatePassword(String newPassword) {
+    setState(() {
+      password = newPassword;
+    });
+  }
+
+  void updateConfirmPassword(String newConfirmPassword) {
+    setState(() {
+      confirmPassword = newConfirmPassword;
+    });
+  }
+
+  bool checkPassword() {
+    return password == confirmPassword;
   }
 
   @override
@@ -71,7 +96,8 @@ class _RegisterPageState extends State<RegisterPage> {
                             bottom: 10, left: 10, right: 10),
                         // Add padding around the text field if needed
                         child: UsernameTextField(
-                            outlineInputBorder: outlineInputBorder),
+                            outlineInputBorder: outlineInputBorder,
+                            onUsernameChange: updateUsername),
                       )))
                     ],
                   ),
@@ -83,7 +109,9 @@ class _RegisterPageState extends State<RegisterPage> {
                             bottom: 10, left: 10, right: 10),
                         // Add padding around the text field if needed
                         child: EmailTextField(
-                            outlineInputBorder: outlineInputBorder, onEmailChange: updateEmail,),
+                          outlineInputBorder: outlineInputBorder,
+                          onEmailChange: updateEmail,
+                        ),
                       )))
                     ],
                   ),
@@ -91,30 +119,36 @@ class _RegisterPageState extends State<RegisterPage> {
                     children: [
                       Expanded(
                           child: (Container(
-                        margin: const EdgeInsets.only(left: 10, right: 10),
-                        // Add padding around the text field if needed
-                        child: PasswordTextField(
-                            outlineInputBorder: outlineInputBorder,
-                            confirmText: "Password"),
-                      )))
+                              margin:
+                                  const EdgeInsets.only(left: 10, right: 10),
+                              // Add padding around the text field if needed
+                              child: PasswordTextField(
+                                outlineInputBorder: outlineInputBorder,
+                                confirmText: "Password",
+                                onPasswordChange: updatePassword,
+                              ))))
                     ],
                   ),
                   Row(
                     children: [
                       Expanded(
                           child: (Container(
-                        margin:
-                            const EdgeInsets.only(top: 10, left: 10, right: 10),
-                        // Add padding around the text field if needed
-                        child: PasswordTextField(
-                            outlineInputBorder: outlineInputBorder,
-                            confirmText: "Confirm Password"),
-                      )))
+                              margin: const EdgeInsets.only(
+                                  top: 10, left: 10, right: 10),
+                              // Add padding around the text field if needed
+                              child: PasswordTextField(
+                                outlineInputBorder: outlineInputBorder,
+                                confirmText: "Confirm Password",
+                                onPasswordChange: updateConfirmPassword,
+                              ))))
                     ],
                   ),
                 ],
               ),
             ),
+            // What I'm thinking is maybe we have another variable as password, and then we can have a function that checks if the password and confirm password are the same.
+            // That function will be in the confirmPassword textfield, and we detect onchange for the confirm password textfield and then call the function to check if the passwords are the same.
+            // If they are the same, then we can enable the create account button, if not, then we disable the create account button and make the textbox border red.
             Expanded(
               child: Align(
                 alignment: Alignment.topCenter,
@@ -124,7 +158,12 @@ class _RegisterPageState extends State<RegisterPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       // Register button
                       children: [
-                        CreateAccountButton(email: email),
+                        CreateAccountButton(
+                          email: email,
+                          password: password,
+                          checkPassword: checkPassword,
+                          username: username,
+                        ),
                       ],
                     ),
                   ],
@@ -138,22 +177,60 @@ class _RegisterPageState extends State<RegisterPage> {
 
 class CreateAccountButton extends StatelessWidget {
   final String email;
+  final String password;
+  final String username;
+  final Function() checkPassword;
 
-  const CreateAccountButton({
+  CreateAccountButton({
     super.key,
     required this.email,
+    required this.password,
+    required this.checkPassword,
+    required this.username,
   });
+
+  Color setColor() {
+    if (checkPassword()) {
+      return Colors.green;
+    } else {
+      return Colors.red;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    CollectionReference users = FirebaseFirestore.instance.collection('users');
+
+    Future<void> addUser(String? uid, String createdEmail, String createdPassword) {
+      // Call the user's CollectionReference to add a new user
+      return users
+          .add({
+            'UID': uid,
+            'email': createdEmail,
+          })
+          .then((value) => print("User Added"))
+          .catchError((error) => print("Failed to add user: $error"));
+    }
+
     return ElevatedButton(
       onPressed: () {
-        FirebaseAuth.instance.createUserWithEmailAndPassword(
-            email: email, password: "password");
+        // Create account button
+        if (checkPassword()) {
+          FirebaseAuth.instance
+              .createUserWithEmailAndPassword(email: email, password: password)
+              .then((UserCredential userCredential) {
+            String? uid = userCredential.user?.uid; // User UID from Firebase
+            // We want to store the user's UID in the database alongside the username
+            addUser(uid, email, password);
+            print("The user's UID is: $uid");
+          }).catchError((error) {
+            print(error);
+          });
+        }
         // Navigator.pushNamed(context, '/main');
       },
       style: ElevatedButton.styleFrom(
-        side: const BorderSide(width: 4, color: Colors.black),
+        side: BorderSide(width: 4, color: setColor()),
         backgroundColor: const Color(0xFF6452AE),
         // Button background color
         foregroundColor: Colors.white,
@@ -179,19 +256,29 @@ class CreateAccountButton extends StatelessWidget {
   }
 }
 
+// Pass the onPasswordChange function to the PasswordTextField widget
+// We can pass either the confirmText or the onPasswordChange function to the PasswordTextField widget
+// Then we'll have a separate thing that checks if the password and confirm password are the same
+// If they are the same, then we can enable the create account button, if not, then we disable the create account button and make the textbox border red.
+
 class PasswordTextField extends StatelessWidget {
   final String confirmText;
+  final Function(String) onPasswordChange;
 
   const PasswordTextField(
       {super.key,
       required this.outlineInputBorder,
-      this.confirmText = "Password"});
+      this.confirmText = "Password",
+      required this.onPasswordChange});
 
   final OutlineInputBorder outlineInputBorder;
 
   @override
   Widget build(BuildContext context) {
     return TextField(
+      onChanged: (text) {
+        onPasswordChange(text);
+      },
       obscureText: true,
       style: const TextStyle(
           fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
@@ -253,9 +340,11 @@ class EmailTextField extends StatelessWidget {
 }
 
 class UsernameTextField extends StatelessWidget {
+  final Function(String) onUsernameChange;
   const UsernameTextField({
     super.key,
     required this.outlineInputBorder,
+    required this.onUsernameChange,
   });
 
   final OutlineInputBorder outlineInputBorder;
@@ -263,6 +352,9 @@ class UsernameTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      onChanged: (text) {
+        onUsernameChange(text);
+      },
       style: const TextStyle(
           fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
       textAlign: TextAlign.center,
