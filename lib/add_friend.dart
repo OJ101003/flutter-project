@@ -1,13 +1,35 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/widgets.dart';
 
 class AddFriend extends StatefulWidget {
-  const AddFriend({super.key});
+  final String uID;
+
+  const AddFriend({super.key, required this.uID});
 
   @override
   State<AddFriend> createState() => _AddFriendState();
 }
 
 class _AddFriendState extends State<AddFriend> {
+
+  String currentFriendField = "";
+
+  void updateFriendField(String value) {
+    setState(() {
+      currentFriendField = value;
+    });
+  }
+
+  // Current implementation just adds the friend to the current user's friends list
+  // This doesn't notify the friend that they have been added.
+  void addFriend(String friendID) async {
+    FirebaseFirestore.instance.collection('users').doc(widget.uID).update({
+      'friends': FieldValue.arrayUnion([friendID])
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var outlineInputBorder = OutlineInputBorder(
@@ -55,6 +77,9 @@ class _AddFriendState extends State<AddFriend> {
                     const EdgeInsets.symmetric(horizontal: 10.0, vertical: 20),
                 // Add padding around the text field if needed
                 child: TextField(
+                  onChanged: (value) {
+                    updateFriendField(value);
+                  },
                   style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -81,38 +106,42 @@ class _AddFriendState extends State<AddFriend> {
               )))
             ],
           ),
-          Column(
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  // Handle the button press
-                },
-                style: ElevatedButton.styleFrom(
-                  side: const BorderSide(width: 4, color: Colors.black),
-                  backgroundColor: const Color(0xFF6452AE),
-                  // Button background color
-                  foregroundColor: Colors.white,
-                  // Text color
-                  elevation: 2,
-                  // Button shadow elevation
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30), // Rounded shape
+          Expanded(
+            flex: 0,
+            child: Column(
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    addFriend(currentFriendField);
+                    // Handle the button press
+                  },
+                  style: ElevatedButton.styleFrom(
+                    side: const BorderSide(width: 4, color: Colors.black),
+                    backgroundColor: const Color(0xFF6452AE),
+                    // Button background color
+                    foregroundColor: Colors.white,
+                    // Text color
+                    elevation: 2,
+                    // Button shadow elevation
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30), // Rounded shape
+                    ),
+                    minimumSize: const Size(150, 40),
+                    // Set the button's minimum size
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 25,
+                        vertical: 10), // Inner padding of the button
                   ),
-                  minimumSize: const Size(150, 40),
-                  // Set the button's minimum size
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 25,
-                      vertical: 10), // Inner padding of the button
-                ),
-                child: const Text(
-                  'Add Friend',
-                  style: TextStyle(
-                    fontSize: 25, // Set the font size
-                    fontWeight: FontWeight.bold, // Set the font weight
+                  child: const Text(
+                    'Add Friend',
+                    style: TextStyle(
+                      fontSize: 25, // Set the font size
+                      fontWeight: FontWeight.bold, // Set the font weight
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           Expanded(
             child: Container(
@@ -125,13 +154,14 @@ class _AddFriendState extends State<AddFriend> {
                       fontWeight: FontWeight.bold,
                       color: Colors.black),
                 ),
-                SizedBox(
-                  height: 370,
+                Expanded(
                   child: ListView(
-                    children: const [FriendRequest(),
+                    children: const [
                       FriendRequest(),
                       FriendRequest(),
-                      FriendRequest()],
+                      FriendRequest(),
+                      FriendRequest()
+                    ],
                   ),
                 )
               ]),
@@ -184,14 +214,18 @@ class FriendRequest extends StatelessWidget {
               },
               style: ElevatedButton.styleFrom(
                 side: const BorderSide(width: 4, color: Colors.black),
-                backgroundColor: Colors.green, // Button background color to green
-                foregroundColor: Colors.white, // Icon color
+                backgroundColor: Colors.green,
+                // Button background color to green
+                foregroundColor: Colors.white,
+                // Icon color
                 elevation: 2,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30),
                 ),
-                minimumSize: const Size(70, 50), // Adjust the size as needed
-                padding: const EdgeInsets.all(10), // Adjust the padding as needed
+                minimumSize: const Size(70, 50),
+                // Adjust the size as needed
+                padding:
+                    const EdgeInsets.all(10), // Adjust the padding as needed
               ),
               child: const Icon(
                 Icons.check, // Checkmark icon
@@ -205,13 +239,16 @@ class FriendRequest extends StatelessWidget {
             },
             style: ElevatedButton.styleFrom(
               side: const BorderSide(width: 4, color: Colors.black),
-              backgroundColor: Colors.red, // Button background color to red
-              foregroundColor: Colors.white, // Icon color
+              backgroundColor: Colors.red,
+              // Button background color to red
+              foregroundColor: Colors.white,
+              // Icon color
               elevation: 2,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30),
               ),
-              minimumSize: const Size(70, 50), // Adjust the size as needed
+              minimumSize: const Size(70, 50),
+              // Adjust the size as needed
               padding: const EdgeInsets.all(10), // Adjust the padding as needed
             ),
             child: const Icon(
@@ -220,7 +257,6 @@ class FriendRequest extends StatelessWidget {
               color: Colors.white, // Icon color set to white for contrast
             ),
           )
-
         ],
       ),
     );

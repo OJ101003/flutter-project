@@ -48,6 +48,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   var selectedIndex = 0;
   String username = '';
+  String uid = '';
 
   @override
 
@@ -63,6 +64,8 @@ class _MyHomePageState extends State<MyHomePage> {
     if (uid == null) {
       print("User is not logged in");
       return null;
+    } else {
+      setUid(uid);
     }
 
     try {
@@ -94,16 +97,22 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  void setUid(String uid) {
+    setState(() {
+      this.uid = uid;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget page;
     switch (selectedIndex) {
       case 0:
-        page = MainPage(username: username,);
+        page = MainPage(username: username, uid: uid,);
       case 1:
         page = ProfilePage(username: username,);
       default:
-        page = MainPage(username: username,);
+        page = MainPage(username: username, uid: uid,);
     }
     void setIndex(int index) {
       setState(() {
@@ -187,9 +196,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
 class MainPage extends StatelessWidget {
   final String username;
+  final String uid;
   const MainPage({
     super.key,
     required this.username,
+    required this.uid,
   });
   
   @override
@@ -226,7 +237,7 @@ class MainPage extends StatelessWidget {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const AddFriend()));
+                            builder: (context) => AddFriend(uID: uid,)));
                   },
                   elevation: 2.0,
                   fillColor: Colors.blueGrey,
