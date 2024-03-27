@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class EditProfile extends StatefulWidget {
   const EditProfile({super.key});
@@ -8,6 +9,18 @@ class EditProfile extends StatefulWidget {
 }
 
 class _EditProfileState extends State<EditProfile> {
+
+  Future<void> signOut() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      if (mounted) { // Check if the widget is still in the widget tree
+        Navigator.pushReplacementNamed(context, '/');
+      }
+    } catch (error) {
+      print("Sign out error: $error");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var outlineInputBorder = OutlineInputBorder(
@@ -224,6 +237,44 @@ class _EditProfileState extends State<EditProfile> {
                 ),
                 child: const Text(
                   'Delete Account',
+                  style: TextStyle(
+                    fontSize: 34, // Set the font size
+                    fontWeight: FontWeight.bold, // Set the font weight
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        Column(
+          // Delete account username
+          children: [
+            Container(
+              margin: const EdgeInsets.only(top: 60),
+              child: ElevatedButton(
+                onPressed: () {
+                  signOut();
+                  // Handle the button press
+                },
+                style: ElevatedButton.styleFrom(
+                  side: const BorderSide(width: 4, color: Colors.black),
+                  backgroundColor: const Color(0xFF6452AE),
+                  // Button background color
+                  foregroundColor: Colors.white,
+                  // Text color
+                  elevation: 2,
+                  // Button shadow elevation
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20), // Rounded shape
+                  ),
+                  minimumSize: const Size(150, 40),
+                  // Set the button's minimum size
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 25,
+                      vertical: 10), // Inner padding of the button
+                ),
+                child: const Text(
+                  'Sign Out',
                   style: TextStyle(
                     fontSize: 34, // Set the font size
                     fontWeight: FontWeight.bold, // Set the font weight

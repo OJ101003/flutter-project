@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -8,6 +9,40 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  String email = '';
+  String password = '';
+
+  void signIn() async {
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      if (mounted) { // Check if the widget is still in the widget tree
+        Navigator.pushReplacementNamed(context, '/main');
+      }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        print('No user found for that email.');
+      } else if (e.code == 'wrong-password') {
+        print('Wrong password provided for that user.');
+      }
+    }
+  }
+
+
+  void updateEmail(String email) {
+    setState(() {
+      this.email = email;
+    });
+  }
+
+  void updatePassword(String password) {
+    setState(() {
+      this.password = password;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var outlineInputBorder = OutlineInputBorder(
@@ -77,7 +112,7 @@ class _LoginPageState extends State<LoginPage> {
                         margin: const EdgeInsets.only(
                             bottom: 10, left: 10, right: 10),
                         // Add padding around the text field if needed
-                        child: UsernameTextField(outlineInputBorder: outlineInputBorder),
+                        child: UsernameTextField(outlineInputBorder: outlineInputBorder, updateEmail: updateEmail, email: email),
                       )))
                     ],
                   ),
@@ -87,7 +122,7 @@ class _LoginPageState extends State<LoginPage> {
                           child: (Container(
                         margin: const EdgeInsets.only(left: 10, right: 10),
                         // Add padding around the text field if needed
-                        child: PasswordTextField(outlineInputBorder: outlineInputBorder),
+                        child: PasswordTextField(outlineInputBorder: outlineInputBorder, updatePassword: updatePassword, password: password),
                       )))
                     ],
                   ),
@@ -121,11 +156,11 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     Container(
                       margin: const EdgeInsets.only(bottom: 10),
-                      child: const Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         // Sign in button
                         children: [
-                          SignInButton(),
+                          SignInButton(signIn: signIn),
                         ],
                       ),
                     ),
@@ -188,9 +223,14 @@ class CreateAccountButton extends StatelessWidget {
 }
 
 class PasswordTextField extends StatelessWidget {
+  final Function(String) updatePassword;
+  final String password;
+
   const PasswordTextField({
     super.key,
     required this.outlineInputBorder,
+    required this.updatePassword,
+    required this.password,
   });
 
   final OutlineInputBorder outlineInputBorder;
@@ -198,6 +238,7 @@ class PasswordTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      onChanged: (text) => updatePassword(text),
       obscureText: true,
       style: const TextStyle(
           fontSize: 20,
@@ -227,9 +268,14 @@ class PasswordTextField extends StatelessWidget {
 }
 
 class UsernameTextField extends StatelessWidget {
+  final Function(String) updateEmail;
+  final String email;
+
   const UsernameTextField({
     super.key,
     required this.outlineInputBorder,
+    required this.updateEmail,
+    required this.email,
   });
 
   final OutlineInputBorder outlineInputBorder;
@@ -237,6 +283,7 @@ class UsernameTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      onChanged: (text) => updateEmail(text),
       style: const TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.bold,
@@ -265,8 +312,10 @@ class UsernameTextField extends StatelessWidget {
 }
 
 class SignInButton extends StatelessWidget {
+  final VoidCallback signIn;
   const SignInButton({
     super.key,
+    required this.signIn,
   });
 
   @override
@@ -274,7 +323,7 @@ class SignInButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: () {
         // Handle the button press
-        Navigator.pushNamed(context, '/main');
+        signIn();
       },
       style: ElevatedButton.styleFrom(
         side: const BorderSide(
