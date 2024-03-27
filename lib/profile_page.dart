@@ -3,7 +3,9 @@ import 'package:now_me/create_status.dart';
 import 'package:now_me/edit_profile.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+  final String username;
+
+  const ProfilePage({super.key, required this.username});
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -25,6 +27,8 @@ class _ProfilePageState extends State<ProfilePage> {
     'Button 2',
     // Add as many button labels as you need
   ];
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -55,9 +59,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   children: [
                     Container(
                       margin: const EdgeInsets.only(bottom: 5),
-                      child: const Text(
-                        "User Name",
-                        style: TextStyle(fontSize: 24),
+                      child: Text(
+                        widget.username,
+                        style: const TextStyle(fontSize: 24),
                       ),
                     ),
                     ElevatedButton(
@@ -109,7 +113,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const CreateStatus()),
+                    MaterialPageRoute(
+                        builder: (context) => const CreateStatus()),
                   );
                 },
                 style: ElevatedButton.styleFrom(
@@ -212,9 +217,12 @@ class CustomButton extends StatelessWidget {
         child: ElevatedButton(
           onPressed: onPressed,
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFD9D9D9), // Button background color
-            foregroundColor: Colors.white, // Text color
-            elevation: 5, // Button shadow elevation
+            backgroundColor: const Color(0xFFD9D9D9),
+            // Button background color
+            foregroundColor: Colors.white,
+            // Text color
+            elevation: 5,
+            // Button shadow elevation
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(30), // Rounded shape
             ),

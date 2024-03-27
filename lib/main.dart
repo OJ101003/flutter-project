@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +6,7 @@ import 'package:now_me/add_friend.dart';
 import 'package:now_me/profile_page.dart';
 import 'package:now_me/login_page.dart';
 import 'package:now_me/register_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,17 +47,63 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   var selectedIndex = 0;
+  String username = '';
+
+  @override
+
+  void initState() {
+    super.initState();
+    loadUsername(); // Call your method to load the username here
+  }
+
+  Future<String?> fetchUsername() async {
+    // Assuming the user is logged in and you have their UID
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) {
+      print("User is not logged in");
+      return null;
+    }
+
+    try {
+      // Access the 'users' collection and get the document by UID
+      final docSnapshot = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+
+      // Check if the document exists
+      if (docSnapshot.exists) {
+        // Assuming 'username' field exists in the document
+        final username = docSnapshot.data()?['username'] as String?;
+        return username;
+      } else {
+        print("User document does not exist");
+        return null;
+      }
+    } catch (e) {
+      print("Error fetching user document: $e");
+      return null;
+    }
+  }
+
+  void loadUsername() async {
+    final username = await fetchUsername();
+    if (username != null) {
+      setState(() {
+        // Assuming you have a state variable to hold the username
+        this.username = username;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     Widget page;
     switch (selectedIndex) {
       case 0:
-        page = const MainPage();
+        page = MainPage(username: username,);
       case 1:
-        page = const ProfilePage();
+        page = ProfilePage(username: username,);
       default:
-        page = const MainPage();
+        page = MainPage(username: username,);
     }
     void setIndex(int index) {
       setState(() {
@@ -138,10 +186,12 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class MainPage extends StatelessWidget {
+  final String username;
   const MainPage({
     super.key,
+    required this.username,
   });
-
+  
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -162,10 +212,10 @@ class MainPage extends StatelessWidget {
                     bottomRight: Radius.circular(10),
                   ),
                 ),
-                child: const Center(
+                child: Center(
                   child: Text(
-                    'Your username here',
-                    style: TextStyle(fontSize: 20),
+                    username,
+                    style: const TextStyle(fontSize: 20),
                   ),
                 ),
               ),

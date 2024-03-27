@@ -45,6 +45,11 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (FirebaseAuth.instance.currentUser != null) {
+        Navigator.pushReplacementNamed(context, '/main');
+      }
+    });
     var outlineInputBorder = OutlineInputBorder(
         // This is for the input border since the code was repetitive
         borderRadius: BorderRadius.circular(10.0),

@@ -181,7 +181,7 @@ class CreateAccountButton extends StatelessWidget {
   final String username;
   final Function() checkPassword;
 
-  CreateAccountButton({
+  const CreateAccountButton({
     super.key,
     required this.email,
     required this.password,
@@ -201,13 +201,19 @@ class CreateAccountButton extends StatelessWidget {
   Widget build(BuildContext context) {
     CollectionReference users = FirebaseFirestore.instance.collection('users');
 
-    Future<void> addUser(String? uid, String createdEmail, String createdPassword) {
-      // Call the user's CollectionReference to add a new user
+    Future<void> addUser(String? uid, String createdEmail, String createdUsername) {
+      if (uid == null) {
+        print("UID is null, cannot add user without a UID.");
+        return Future.error("UID is null");
+      }
+
+      // Use doc(uid) to specify the document ID
       return users
-          .add({
-            'UID': uid,
-            'email': createdEmail,
-          })
+          .doc(uid)
+          .set({
+        'email': createdEmail,
+        'username': createdUsername, // Assuming you want to add a username
+      })
           .then((value) => print("User Added"))
           .catchError((error) => print("Failed to add user: $error"));
     }
@@ -221,7 +227,7 @@ class CreateAccountButton extends StatelessWidget {
               .then((UserCredential userCredential) {
             String? uid = userCredential.user?.uid; // User UID from Firebase
             // We want to store the user's UID in the database alongside the username
-            addUser(uid, email, password);
+            addUser(uid, email, username);
             print("The user's UID is: $uid");
           }).catchError((error) {
             print(error);
