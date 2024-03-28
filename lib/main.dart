@@ -51,12 +51,69 @@ class _MyHomePageState extends State<MyHomePage> {
   String uid = '';
 
   @override
-
   void initState() {
     super.initState();
     loadUsername(); // Call your method to load the username here
+    fetchFriends(); // Call your method to fetch friends here
   }
 
+  var friendList = <Friend>{}; // Create an empty list of friends
+
+  Future<List> fetchFriendInfo(String UID) async {
+    try {
+      final friendSnapshot =
+      await FirebaseFirestore.instance.collection('users').doc(UID).get();
+      final friendUsername = friendSnapshot.data()?['username'] as String;
+      final friendImagePath =
+      friendSnapshot.data()?['profilePicture'] as String;
+      final friendTimeUpdated =
+      friendSnapshot.data()?['timeUpdated'];
+      final friendStatus = friendSnapshot.data()?['currentStatus'] as String;
+      return [
+        friendUsername,
+        friendImagePath,
+        friendTimeUpdated,
+        friendStatus
+      ];
+    } catch (e) {
+      print("Error fetching friend info: $e");
+      return [];
+    }
+  }
+
+  // Fetch friends from Firestore and stores them into the friends list
+  // The friends list can be accessed anywhere
+
+  void fetchFriends() async {
+    try {
+      var friendsSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .get(); // List of UIDS
+      var friendsUids = friendsSnapshot.data()?['friends'] as List<dynamic>?; // Ensure it's treated as a nullable list
+      if (friendsUids != null) {
+        for (var friendUid in friendsUids) {
+          var friendInfo = await fetchFriendInfo(friendUid);
+          if (friendInfo.isNotEmpty) { // Check if friendInfo is not empty
+            friendList.add(Friend(friendInfo[0], friendUid, friendInfo[1], friendInfo[2] as Timestamp, friendInfo[3]));
+          }
+        }
+      }
+    } catch (e) {
+      print("Error fetching friends: $e");
+    }
+    for (var friend in friendList) {
+      print(friend.username);
+    }
+    print(friendList.length);
+  }
+
+
+  /// Fetches the username of the current user
+  ///
+  /// Returns the username if it exists, otherwise returns null
+  ///
+  /// Uses the existing Firebase uid to fetch the username from the 'users' collection
   Future<String?> fetchUsername() async {
     // Assuming the user is logged in and you have their UID
     final uid = FirebaseAuth.instance.currentUser?.uid;
@@ -70,7 +127,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
     try {
       // Access the 'users' collection and get the document by UID
-      final docSnapshot = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      final docSnapshot =
+          await FirebaseFirestore.instance.collection('users').doc(uid).get();
 
       // Check if the document exists
       if (docSnapshot.exists) {
@@ -108,11 +166,19 @@ class _MyHomePageState extends State<MyHomePage> {
     Widget page;
     switch (selectedIndex) {
       case 0:
-        page = MainPage(username: username, uid: uid,);
+        page = MainPage(
+          username: username,
+          uid: uid,
+        );
       case 1:
-        page = ProfilePage(username: username,);
+        page = ProfilePage(
+          username: username,
+        );
       default:
-        page = MainPage(username: username, uid: uid,);
+        page = MainPage(
+          username: username,
+          uid: uid,
+        );
     }
     void setIndex(int index) {
       setState(() {
@@ -194,15 +260,27 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
+class Friend {
+  final String username;
+  final String uid;
+  final String profilePicture;
+  final Timestamp timeUpdated;
+  final String currentStatus;
+
+  Friend(this.username, this.uid, this.profilePicture, this.timeUpdated,
+      this.currentStatus);
+}
+
 class MainPage extends StatelessWidget {
   final String username;
   final String uid;
+
   const MainPage({
     super.key,
     required this.username,
     required this.uid,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -237,7 +315,9 @@ class MainPage extends StatelessWidget {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => AddFriend(uID: uid,)));
+                            builder: (context) => AddFriend(
+                                  uID: uid,
+                                )));
                   },
                   elevation: 2.0,
                   fillColor: Colors.blueGrey,

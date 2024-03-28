@@ -213,6 +213,13 @@ class CreateAccountButton extends StatelessWidget {
           .set({
         'email': createdEmail,
         'username': createdUsername, // Assuming you want to add a username
+        'friends': [],
+        'pendingFriends': [],
+        'currentStatus': 'Online',
+        'statusList': [],
+        'profilePicture': 'assets/images/1.jpg',
+        'uid': uid,
+        'timeUpdated': FieldValue.serverTimestamp(),
       })
           .then((value) => print("User Added"))
           .catchError((error) => print("Failed to add user: $error"));
@@ -233,7 +240,7 @@ class CreateAccountButton extends StatelessWidget {
             print(error);
           });
         }
-         Navigator.pushNamed(context, '/');
+         Navigator.pushReplacementNamed(context, '/main');
       },
       style: ElevatedButton.styleFrom(
         side: BorderSide(width: 4, color: setColor()),

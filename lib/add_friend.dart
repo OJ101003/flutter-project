@@ -1,33 +1,83 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/widgets.dart';
 
+/// A widget for adding friends.
 class AddFriend extends StatefulWidget {
   final String uID;
 
+  /// Creates an instance of [AddFriend].
+  ///
+  /// Requires [uID] as a parameter.
   const AddFriend({super.key, required this.uID});
 
   @override
   State<AddFriend> createState() => _AddFriendState();
 }
 
+/// The state for [AddFriend].
 class _AddFriendState extends State<AddFriend> {
 
+  /// The current value of the friend field.
   String currentFriendField = "";
 
+  /// Updates the friend field with the given value.
   void updateFriendField(String value) {
     setState(() {
       currentFriendField = value;
     });
   }
 
-  // Current implementation just adds the friend to the current user's friends list
-  // This doesn't notify the friend that they have been added.
+  /// Retrieves the user ID of a friend by their username.
+  ///
+  /// Returns null if no user is found with the given username.
+  Future<String?> getFriendUidByUsername(String username) async {
+    final CollectionReference usersCollection = FirebaseFirestore.instance.collection('users');
+
+    try {
+      // Query the users collection for a document with the matching username
+      final querySnapshot = await usersCollection
+          .where('username', isEqualTo: username)
+          .limit(1)
+          .get();
+
+      // Check if a user document was found
+      if (querySnapshot.docs.isNotEmpty) {
+        // Assuming username is unique, there should only be one match
+        final userDoc = querySnapshot.docs.first;
+        // Extract and return the UID from the document
+        return userDoc['uid'] as String?;
+      } else {
+        // No user found with that username
+        return null;
+      }
+    } catch (e) {
+      print("Error getting user UID by username: $e");
+      return null;
+    }
+  }
+
+  /// Adds a friend to the current user's friends list.
+  ///
+  /// This does not notify the friend that they have been added.
   void addFriend(String friendID) async {
-    FirebaseFirestore.instance.collection('users').doc(widget.uID).update({
-      'friends': FieldValue.arrayUnion([friendID])
-    });
+    // FirebaseFirestore.instance.collection('users').doc(widget.uID).update({
+    //   'friends': FieldValue.arrayUnion([friendID])
+    // });
+    var friendUID = await getFriendUidByUsername(friendID);
+
+    if(friendUID != null){
+      FirebaseFirestore.instance.collection('users').doc(widget.uID).update({
+        'friends': FieldValue.arrayUnion([friendUID])
+      });
+      FirebaseFirestore.instance.collection('users').doc(friendUID).update({
+        'friends': FieldValue.arrayUnion([widget.uID])
+      });
+    }
+    else{
+      print("User does not exist");
+    }
+
+
   }
 
   @override
