@@ -14,27 +14,67 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  var currentStatus = "";
+
+  @override
+  void initState() {
+    super.initState();
+    // Immediately executed async function.
+    () async {
+      final status = await getStatus(); // Use await here.
+      final statusList = await getStatusList();
+      if (mounted) { // Check if the widget is still in the tree.
+        setState(() {
+          currentStatus = status ?? ""; // Update the state with the fetched status.
+          buttonLabels.addAll(statusList); // Add the status list to the button labels.
+        });
+      }
+    }(); // Note the parentheses to call this anonymous async function.
+  }
+
 
   Future<String?> getStatus() async {
-    final user = FirebaseAuth.instance.currentUser?.uid;
-    final userData = await FirebaseFirestore.instance.collection('users').doc(user).get();
-    return userData['status'] as String?;
+    try {
+      final user = FirebaseAuth.instance.currentUser?.uid;
+      if (user == null) return null; // Return null if there's no user logged in.
+      final userData = await FirebaseFirestore.instance.collection('users').doc(user).get();
+      return userData['currentStatus'] as String?;
+    } catch (e) {
+      print("Error fetching status: $e");
+      return null; // Handle exceptions by returning null or a default value.
+    }
+  }
+
+  Future<List<String>> getStatusList() async{
+    try {
+      final user = FirebaseAuth.instance.currentUser?.uid;
+      if (user == null) return []; // Return an empty list if there's no user logged in.
+      final userData = await FirebaseFirestore.instance.collection('users').doc(user).get();
+      return List<String>.from(userData['statusList'] as List<dynamic>);
+    } catch (e) {
+      print("Error fetching status list: $e");
+      return []; // Handle exceptions by returning an empty list or a default value.
+    }
+  }
+
+  void updateStatus(String newStatus) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser?.uid;
+      if (user == null) return; // Return if there's no user logged in.
+      await FirebaseFirestore.instance.collection('users').doc(user).update({
+        'currentStatus': newStatus,
+        'timeUpdated': FieldValue.serverTimestamp(),
+      });
+      setState(() {
+        currentStatus = newStatus;
+      });
+    } catch (e) {
+      print("Error updating status: $e");
+    }
   }
 
   // var currentStatus = getStatus();
   final List<String> buttonLabels = [
-    'Button 1',
-    'Button 2',
-    'Button 3',
-    'Button 1',
-    'Button 2',
-    'Button 3',
-    'Button 1',
-    'Button 2',
-    'Button 3',
-    'Button 1',
-    'Button 2',
-    // Add as many button labels as you need
   ];
 
 
@@ -159,7 +199,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   child: Center(
                     child: Text(
-                      getStatus() as String,
+                      currentStatus,
                       style: const TextStyle(fontSize: 20),
                     ),
                   ),
@@ -179,7 +219,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   label: buttonLabels[firstButtonIndex],
                   onPressed: () {
                     setState(() {
-                      // currentStatus = buttonLabels[firstButtonIndex];
+                      updateStatus(buttonLabels[firstButtonIndex]);
                     });
                   },
                 ),
@@ -192,7 +232,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     label: buttonLabels[secondButtonIndex],
                     onPressed: () {
                       setState(() {
-                        // currentStatus = buttonLabels[secondButtonIndex];
+                        updateStatus(buttonLabels[secondButtonIndex]);
                       });
                     },
                   ),

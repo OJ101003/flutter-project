@@ -53,8 +53,12 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    loadUsername(); // Call your method to load the username here
-    fetchFriends(); // Call your method to fetch friends here
+    loadUsername();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        fetchFriends(); // Ensures fetching of friends occurs after the initial build
+      }
+    });
   }
 
   var friendList = <Friend>{}; // Create an empty list of friends
@@ -92,12 +96,14 @@ class _MyHomePageState extends State<MyHomePage> {
           .get(); // List of UIDS
       var friendsUids = friendsSnapshot.data()?['friends'] as List<dynamic>?; // Ensure it's treated as a nullable list
       if (friendsUids != null) {
+        var temp = <Friend>{}; // Create a temporary list to store friends
         for (var friendUid in friendsUids) {
           var friendInfo = await fetchFriendInfo(friendUid);
-          if (friendInfo.isNotEmpty) { // Check if friendInfo is not empty
-            friendList.add(Friend(friendInfo[0], friendUid, friendInfo[1], friendInfo[2] as Timestamp, friendInfo[3]));
-          }
+          temp.add(Friend(friendInfo[0], friendUid, friendInfo[1], friendInfo[2] as Timestamp, friendInfo[3]));
         }
+        setState(() {
+          friendList = temp; // Update the state with the fetched friends
+        });
       }
     } catch (e) {
       print("Error fetching friends: $e");
@@ -105,7 +111,6 @@ class _MyHomePageState extends State<MyHomePage> {
     for (var friend in friendList) {
       print(friend.username);
     }
-    print(friendList.length);
   }
 
 
@@ -171,21 +176,27 @@ class _MyHomePageState extends State<MyHomePage> {
           uid: uid,
           friendList: friendList,
         );
+        break;
       case 1:
         page = ProfilePage(
           username: username,
         );
+        break;
       default:
         page = MainPage(
           username: username,
           uid: uid,
           friendList: friendList,
         );
+        break;
     }
     void setIndex(int index) {
       setState(() {
         selectedIndex = index;
       });
+      if(index == 0){
+        fetchFriends();
+      }
     }
 
     return Scaffold(
@@ -284,6 +295,7 @@ class MainPage extends StatelessWidget {
     required this.uid,
     required this.friendList,
   });
+
 
   @override
   Widget build(BuildContext context) {
