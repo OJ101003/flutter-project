@@ -240,7 +240,7 @@ class CreateAccountButton extends StatelessWidget {
             print(error);
           });
         }
-         Navigator.pushReplacementNamed(context, '/main');
+         Navigator.pushReplacementNamed(context, '/');
       },
       style: ElevatedButton.styleFrom(
         side: BorderSide(width: 4, color: setColor()),

@@ -169,6 +169,7 @@ class _MyHomePageState extends State<MyHomePage> {
         page = MainPage(
           username: username,
           uid: uid,
+          friendList: friendList,
         );
       case 1:
         page = ProfilePage(
@@ -178,6 +179,7 @@ class _MyHomePageState extends State<MyHomePage> {
         page = MainPage(
           username: username,
           uid: uid,
+          friendList: friendList,
         );
     }
     void setIndex(int index) {
@@ -274,11 +276,13 @@ class Friend {
 class MainPage extends StatelessWidget {
   final String username;
   final String uid;
+  final Set<Friend> friendList;
 
   const MainPage({
     super.key,
     required this.username,
     required this.uid,
+    required this.friendList,
   });
 
   @override
@@ -333,59 +337,19 @@ class MainPage extends StatelessWidget {
           ),
         ),
         Expanded(
-          // Wrap the ListView in an Expanded widget
-          child: ListView(
-            children: const [
-              FriendHomePage(
-                imagePath: 'assets/images/1.jpg',
-                username: "Random person",
-                lastUpdated: '3 hours ago',
-                status: 'Doing Homework',
-              ),
-              LineDivider(),
-              FriendHomePage(
-                imagePath: 'assets/images/2.jpg',
-                username: "Someone else",
-                lastUpdated: '4 days ago',
-                status: 'Pulling all nighter',
-              ),
-              LineDivider(),
-              FriendHomePage(
-                imagePath: 'assets/images/7.jpg',
-                username: "Another person",
-                lastUpdated: '2 minutes ago',
-                status: 'Sleeping',
-              ),
-              LineDivider(),
-              FriendHomePage(
-                imagePath: 'assets/images/3.jpg',
-                username: "Guy from high school",
-                lastUpdated: '4 hours ago',
-                status: 'Working',
-              ),
-              LineDivider(),
-              FriendHomePage(
-                imagePath: 'assets/images/4.jpg',
-                username: "Local hobo",
-                lastUpdated: 'Just now',
-                status: 'Wandering around',
-              ),
-              LineDivider(),
-              FriendHomePage(
-                imagePath: 'assets/images/8.jpg',
-                username: "Another person",
-                lastUpdated: '2 minutes ago',
-                status: 'Sleeping',
-              ),
-              LineDivider(),
-              FriendHomePage(
-                imagePath: 'assets/images/5.jpg',
-                username: "Another person",
-                lastUpdated: '2 minutes ago',
-                status: 'Sleeping',
-              ),
-              // Add more FriendHomePage widgets as needed
-            ],
+          child: ListView.separated(
+            itemCount: friendList.length,
+            itemBuilder: (BuildContext context, int index) {
+              // Convert the Set to a List and access by index
+              var friend = friendList.toList()[index];
+              return FriendHomePage(
+                imagePath: friend.profilePicture,
+                username: friend.username,
+                lastUpdated: friend.timeUpdated.toDate().toString(),
+                status: friend.currentStatus,
+              );
+            },
+            separatorBuilder: (BuildContext context, int index) => const LineDivider(),
           ),
         ),
       ],
