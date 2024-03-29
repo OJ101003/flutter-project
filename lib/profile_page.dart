@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:now_me/create_status.dart';
 import 'package:now_me/edit_profile.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ProfilePage extends StatefulWidget {
   final String username;
@@ -12,7 +14,14 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  var currentStatus = "Current Status";
+
+  Future<String?> getStatus() async {
+    final user = FirebaseAuth.instance.currentUser?.uid;
+    final userData = await FirebaseFirestore.instance.collection('users').doc(user).get();
+    return userData['status'] as String?;
+  }
+
+  // var currentStatus = getStatus();
   final List<String> buttonLabels = [
     'Button 1',
     'Button 2',
@@ -150,7 +159,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   child: Center(
                     child: Text(
-                      currentStatus,
+                      getStatus() as String,
                       style: const TextStyle(fontSize: 20),
                     ),
                   ),
@@ -170,7 +179,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   label: buttonLabels[firstButtonIndex],
                   onPressed: () {
                     setState(() {
-                      currentStatus = buttonLabels[firstButtonIndex];
+                      // currentStatus = buttonLabels[firstButtonIndex];
                     });
                   },
                 ),
@@ -183,7 +192,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     label: buttonLabels[secondButtonIndex],
                     onPressed: () {
                       setState(() {
-                        currentStatus = buttonLabels[secondButtonIndex];
+                        // currentStatus = buttonLabels[secondButtonIndex];
                       });
                     },
                   ),

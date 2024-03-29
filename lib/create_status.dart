@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CreateStatus extends StatefulWidget {
   const CreateStatus({super.key});
@@ -8,6 +10,26 @@ class CreateStatus extends StatefulWidget {
 }
 
 class _CreateStatusState extends State<CreateStatus> {
+
+  String statusName = '';
+
+  void updateStatusName(String value) {
+    setState(() {
+      statusName = value;
+    });
+  }
+
+  void createStatus(String statusName) {
+    var userUID = FirebaseAuth.instance.currentUser?.uid;
+    FirebaseFirestore.instance.collection('users').doc(userUID).update({
+      'statusList': FieldValue.arrayUnion([statusName]),
+    }).then((value) {
+      print('StatusList updated');
+    }).catchError((error) {
+      print('Failed to update status: $error');
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var outlineInputBorder = OutlineInputBorder(
@@ -55,6 +77,9 @@ class _CreateStatusState extends State<CreateStatus> {
                     const EdgeInsets.symmetric(horizontal: 10.0, vertical: 20),
                 // Add padding around the text field if needed
                 child: TextField(
+                  onChanged: (value) {
+                    updateStatusName(value);
+                  },
                   style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -85,6 +110,7 @@ class _CreateStatusState extends State<CreateStatus> {
             children: [
               ElevatedButton(
                 onPressed: () {
+                  createStatus(statusName);
                   // Handle the button press
                 },
                 style: ElevatedButton.styleFrom(
