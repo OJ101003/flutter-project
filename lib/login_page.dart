@@ -14,10 +14,12 @@ class _LoginPageState extends State<LoginPage> {
 
   void signIn() async {
     try {
+      print('Signing in');
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
+      print('Signed in');
       if (mounted) { // Check if the widget is still in the widget tree
         Navigator.pushReplacementNamed(context, '/main');
       }

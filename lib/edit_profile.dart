@@ -1,5 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:now_me/utils.dart';
 
 class EditProfile extends StatefulWidget {
   const EditProfile({super.key});
@@ -9,6 +14,15 @@ class EditProfile extends StatefulWidget {
 }
 
 class _EditProfileState extends State<EditProfile> {
+
+  Uint8List? _image;
+
+  void selectImage() async{
+    Uint8List img = await pickImage(ImageSource.gallery);
+    setState(() {
+      _image = img;
+    });
+  }
 
   Future<void> signOut() async {
     try {
@@ -73,7 +87,7 @@ class _EditProfileState extends State<EditProfile> {
               margin: const EdgeInsets.only(top: 20),
               child: ElevatedButton(
                 onPressed: () {
-                  // Handle the button press
+                  selectImage();
                 },
                 style: ElevatedButton.styleFrom(
                   side: const BorderSide(width: 4, color: Colors.black),

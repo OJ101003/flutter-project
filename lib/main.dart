@@ -66,19 +66,13 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<List> fetchFriendInfo(String UID) async {
     try {
       final friendSnapshot =
-      await FirebaseFirestore.instance.collection('users').doc(UID).get();
+          await FirebaseFirestore.instance.collection('users').doc(UID).get();
       final friendUsername = friendSnapshot.data()?['username'] as String;
       final friendImagePath =
-      friendSnapshot.data()?['profilePicture'] as String;
-      final friendTimeUpdated =
-      friendSnapshot.data()?['timeUpdated'];
+          friendSnapshot.data()?['profilePicture'] as String;
+      final friendTimeUpdated = friendSnapshot.data()?['timeUpdated'];
       final friendStatus = friendSnapshot.data()?['currentStatus'] as String;
-      return [
-        friendUsername,
-        friendImagePath,
-        friendTimeUpdated,
-        friendStatus
-      ];
+      return [friendUsername, friendImagePath, friendTimeUpdated, friendStatus];
     } catch (e) {
       print("Error fetching friend info: $e");
       return [];
@@ -94,12 +88,14 @@ class _MyHomePageState extends State<MyHomePage> {
           .collection('users')
           .doc(uid)
           .get(); // List of UIDS
-      var friendsUids = friendsSnapshot.data()?['friends'] as List<dynamic>?; // Ensure it's treated as a nullable list
+      var friendsUids = friendsSnapshot.data()?['friends']
+          as List<dynamic>?; // Ensure it's treated as a nullable list
       if (friendsUids != null) {
         var temp = <Friend>{}; // Create a temporary list to store friends
         for (var friendUid in friendsUids) {
           var friendInfo = await fetchFriendInfo(friendUid);
-          temp.add(Friend(friendInfo[0], friendUid, friendInfo[1], friendInfo[2] as Timestamp, friendInfo[3]));
+          temp.add(Friend(friendInfo[0], friendUid, friendInfo[1],
+              friendInfo[2] as Timestamp, friendInfo[3]));
         }
         setState(() {
           friendList = temp; // Update the state with the fetched friends
@@ -112,7 +108,6 @@ class _MyHomePageState extends State<MyHomePage> {
       print(friend.username);
     }
   }
-
 
   /// Fetches the username of the current user
   ///
@@ -297,7 +292,6 @@ class MainPage extends StatelessWidget {
     required this.fetchFriends,
   });
 
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -352,11 +346,6 @@ class MainPage extends StatelessWidget {
         Expanded(
           child: RefreshIndicator(
             onRefresh: () async {
-              // Fetch friends again when the user pulls down to refresh
-              // This will update the friends list
-              // This is a simple way to refresh the friends list
-              // You can also add a button to refresh the friends list
-              // Or use a StreamBuilder to listen for changes in the friends list
               fetchFriends();
             },
             child: ListView.separated(
@@ -369,9 +358,11 @@ class MainPage extends StatelessWidget {
                   username: friend.username,
                   lastUpdated: friend.timeUpdated.toDate().toString(),
                   status: friend.currentStatus,
+                  uID: friend.uid,
                 );
               },
-              separatorBuilder: (BuildContext context, int index) => const LineDivider(),
+              separatorBuilder: (BuildContext context, int index) =>
+                  const LineDivider(),
             ),
           ),
         ),
@@ -397,11 +388,12 @@ class LineDivider extends StatelessWidget {
   }
 }
 
-class FriendHomePage extends StatelessWidget {
+class FriendHomePage extends StatefulWidget {
   final String imagePath;
   final String username;
   final String lastUpdated;
   final String status;
+  final String uID;
 
   const FriendHomePage({
     super.key,
@@ -409,28 +401,33 @@ class FriendHomePage extends StatelessWidget {
     this.username = 'Username',
     this.lastUpdated = 'Today',
     this.status = 'Nothing',
+    required this.uID,
   });
 
+  @override
+  State<FriendHomePage> createState() => _FriendHomePageState();
+}
+
+class _FriendHomePageState extends State<FriendHomePage> {
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onLongPress: () {
         // Handle the long press
-        _showMenu(context);
+        _showMenu(context, widget.uID);
       },
       splashColor: Colors.blue,
       highlightColor: Colors.blueAccent,
       child: Container(
         margin: const EdgeInsets.only(top: 10),
         padding: const EdgeInsets.all(10),
-
         child: IntrinsicHeight(
           child: DefaultTextStyle(
             style: const TextStyle(color: Colors.white),
             child: Row(
               children: [
                 CircleAvatar(
-                  backgroundImage: AssetImage(imagePath),
+                  backgroundImage: AssetImage(widget.imagePath),
                   radius: 40,
                 ),
                 Expanded(
@@ -442,14 +439,14 @@ class FriendHomePage extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.all(4.0),
                           child: Text(
-                            username,
+                            widget.username,
                             style: const TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 18),
                           ),
                         ),
                         Padding(
                           padding: const EdgeInsets.all(4.0),
-                          child: Text('Last Updated: $lastUpdated'),
+                          child: Text('Last Updated: ${widget.lastUpdated}'),
                         ),
                       ],
                     ),
@@ -466,7 +463,7 @@ class FriendHomePage extends StatelessWidget {
                   flex: 4,
                   child: Center(
                       child: Text(
-                    status,
+                    widget.status,
                     style: const TextStyle(fontSize: 28),
                   )),
                 )
@@ -477,44 +474,65 @@ class FriendHomePage extends StatelessWidget {
       ),
     );
   }
-  Future<void> _showMenu(BuildContext context) async {
-    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+
+  Future<void> _showMenu(BuildContext context, uID) async {
+    final RenderBox overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
     final RenderBox button = context.findRenderObject() as RenderBox;
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
         button.localToGlobal(Offset.zero, ancestor: overlay),
-        button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+        button.localToGlobal(button.size.bottomRight(Offset.zero),
+            ancestor: overlay),
       ),
       Offset.zero & overlay.size,
     );
 
     final selectedItem = await showMenu(
-      context: context,
-      position: position, // Position based on the InkWell's widget
-      items: [
-        PopupMenuItem(
-          value: 'Option 1',
-          child: Text('Remove Friend'),
-        ),
-        // Add more options as needed
-      ],
-    )?? '';
+          context: context,
+          position: position, // Position based on the InkWell's widget
+          items: [
+            const PopupMenuItem(
+              value: 'Option 1',
+              child: Center(
+                child: SizedBox(
+                    width: 200,
+                    child:
+                        Text('Remove Friend', style: TextStyle(fontSize: 18), textAlign: TextAlign.center)),
+              ),
+            ),
+            // Add more options as needed
+          ],
+        ) ??
+        '';
 
     // Handle the selected item
     if (selectedItem == 'Option 1') {
-      // Handle the remove friend option
-
-    } else {
-      // Handle other options
+      // Remove friend
+      removeFriend(uID);
     }
   }
 
   Future<void> removeFriend(String friendUid) async {
     try {
-      await FirebaseFirestore.instance.collection('users').doc(friendUid).update({
+      // FriendUid is the friends uid, same is uID
+      // We also want to pass the current user's uid
+      // FirebaseAuth.instance.currentUser?.uid is the current usersID
+      var curUser = FirebaseAuth.instance.currentUser?.uid;
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(friendUid)
+          .update({
+        'friends': FieldValue.arrayRemove([curUser])
+      });
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(curUser)
+          .update({
         'friends': FieldValue.arrayRemove([friendUid])
       });
-      print('Friend removed successfully');
+      print('Friend removed successfully $friendUid');
+      print('Current user: ${FirebaseAuth.instance.currentUser?.uid}');
     } catch (e) {
       print('Error removing friend: $e');
     }
