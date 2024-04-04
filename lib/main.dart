@@ -175,6 +175,7 @@ class _MyHomePageState extends State<MyHomePage> {
           username: username,
           uid: uid,
           friendList: friendList,
+          fetchFriends: fetchFriends,
         );
         break;
       case 1:
@@ -187,6 +188,7 @@ class _MyHomePageState extends State<MyHomePage> {
           username: username,
           uid: uid,
           friendList: friendList,
+          fetchFriends: fetchFriends,
         );
         break;
     }
@@ -194,9 +196,6 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {
         selectedIndex = index;
       });
-      if(index == 0){
-        fetchFriends();
-      }
     }
 
     return Scaffold(
@@ -288,12 +287,14 @@ class MainPage extends StatelessWidget {
   final String username;
   final String uid;
   final Set<Friend> friendList;
+  final Function() fetchFriends;
 
   const MainPage({
     super.key,
     required this.username,
     required this.uid,
     required this.friendList,
+    required this.fetchFriends,
   });
 
 
@@ -349,19 +350,29 @@ class MainPage extends StatelessWidget {
           ),
         ),
         Expanded(
-          child: ListView.separated(
-            itemCount: friendList.length,
-            itemBuilder: (BuildContext context, int index) {
-              // Convert the Set to a List and access by index
-              var friend = friendList.toList()[index];
-              return FriendHomePage(
-                imagePath: friend.profilePicture,
-                username: friend.username,
-                lastUpdated: friend.timeUpdated.toDate().toString(),
-                status: friend.currentStatus,
-              );
+          child: RefreshIndicator(
+            onRefresh: () async {
+              // Fetch friends again when the user pulls down to refresh
+              // This will update the friends list
+              // This is a simple way to refresh the friends list
+              // You can also add a button to refresh the friends list
+              // Or use a StreamBuilder to listen for changes in the friends list
+              fetchFriends();
             },
-            separatorBuilder: (BuildContext context, int index) => const LineDivider(),
+            child: ListView.separated(
+              itemCount: friendList.length,
+              itemBuilder: (BuildContext context, int index) {
+                // Convert the Set to a List and access by index
+                var friend = friendList.toList()[index];
+                return FriendHomePage(
+                  imagePath: friend.profilePicture,
+                  username: friend.username,
+                  lastUpdated: friend.timeUpdated.toDate().toString(),
+                  status: friend.currentStatus,
+                );
+              },
+              separatorBuilder: (BuildContext context, int index) => const LineDivider(),
+            ),
           ),
         ),
       ],
@@ -402,58 +413,110 @@ class FriendHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(top: 10),
-      child: IntrinsicHeight(
-        child: DefaultTextStyle(
-          style: const TextStyle(color: Colors.white),
-          child: Row(
-            children: [
-              CircleAvatar(
-                backgroundImage: AssetImage(imagePath),
-                radius: 40,
-              ),
-              Expanded(
-                flex: 3,
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: Text(
-                          username,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 18),
+    return InkWell(
+      onLongPress: () {
+        // Handle the long press
+        _showMenu(context);
+      },
+      splashColor: Colors.blue,
+      highlightColor: Colors.blueAccent,
+      child: Container(
+        margin: const EdgeInsets.only(top: 10),
+        padding: const EdgeInsets.all(10),
+
+        child: IntrinsicHeight(
+          child: DefaultTextStyle(
+            style: const TextStyle(color: Colors.white),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  backgroundImage: AssetImage(imagePath),
+                  radius: 40,
+                ),
+                Expanded(
+                  flex: 3,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Text(
+                            username,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 18),
+                          ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: Text('Last Updated: $lastUpdated'),
-                      ),
-                    ],
+                        Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Text('Last Updated: $lastUpdated'),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const VerticalDivider(
-                width: 15,
-                thickness: 1,
-                indent: 10,
-                endIndent: 0,
-                color: Colors.white,
-              ),
-              Expanded(
-                flex: 4,
-                child: Center(
-                    child: Text(
-                  status,
-                  style: const TextStyle(fontSize: 28),
-                )),
-              )
-            ],
+                const VerticalDivider(
+                  width: 15,
+                  thickness: 1,
+                  indent: 10,
+                  endIndent: 0,
+                  color: Colors.white,
+                ),
+                Expanded(
+                  flex: 4,
+                  child: Center(
+                      child: Text(
+                    status,
+                    style: const TextStyle(fontSize: 28),
+                  )),
+                )
+              ],
+            ),
           ),
         ),
       ),
     );
+  }
+  Future<void> _showMenu(BuildContext context) async {
+    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    final RenderBox button = context.findRenderObject() as RenderBox;
+    final RelativeRect position = RelativeRect.fromRect(
+      Rect.fromPoints(
+        button.localToGlobal(Offset.zero, ancestor: overlay),
+        button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+      ),
+      Offset.zero & overlay.size,
+    );
+
+    final selectedItem = await showMenu(
+      context: context,
+      position: position, // Position based on the InkWell's widget
+      items: [
+        PopupMenuItem(
+          value: 'Option 1',
+          child: Text('Remove Friend'),
+        ),
+        // Add more options as needed
+      ],
+    )?? '';
+
+    // Handle the selected item
+    if (selectedItem == 'Option 1') {
+      // Handle the remove friend option
+
+    } else {
+      // Handle other options
+    }
+  }
+
+  Future<void> removeFriend(String friendUid) async {
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(friendUid).update({
+        'friends': FieldValue.arrayRemove([friendUid])
+      });
+      print('Friend removed successfully');
+    } catch (e) {
+      print('Error removing friend: $e');
+    }
   }
 }

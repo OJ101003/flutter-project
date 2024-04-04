@@ -14,8 +14,16 @@ class AddFriend extends StatefulWidget {
   State<AddFriend> createState() => _AddFriendState();
 }
 
+class FriendRequestInfo {
+  final String uid;
+  final String username;
+
+  FriendRequestInfo(this.uid, this.username);
+}
 /// The state for [AddFriend].
 class _AddFriendState extends State<AddFriend> {
+
+
 
   /// The current value of the friend field.
   String currentFriendField = "";
@@ -60,24 +68,50 @@ class _AddFriendState extends State<AddFriend> {
   ///
   /// This does not notify the friend that they have been added.
   void addFriend(String friendID) async {
-    // FirebaseFirestore.instance.collection('users').doc(widget.uID).update({
-    //   'friends': FieldValue.arrayUnion([friendID])
-    // });
     var friendUID = await getFriendUidByUsername(friendID);
+    var userDoc = await FirebaseFirestore.instance.collection('users').doc(widget.uID).get();
 
-    if(friendUID != null){
-      FirebaseFirestore.instance.collection('users').doc(widget.uID).update({
-        'friends': FieldValue.arrayUnion([friendUID])
-      });
+    if(friendUID != null && friendUID != widget.uID && !userDoc.data()?["friends"].contains(friendUID) && !userDoc.data()?["pendingFriends"].contains(friendUID)){
       FirebaseFirestore.instance.collection('users').doc(friendUID).update({
-        'friends': FieldValue.arrayUnion([widget.uID])
-      });
+        'pendingFriends': FieldValue.arrayUnion([widget.uID])
+      }); // This adds the current users id to the pendingFriends list of the friend
     }
     else{
-      print("User does not exist");
+      print("Friend not found or already added as friend or is the current user.");
     }
+    setState(() {
+      currentFriendField = "";
+    });
+
+  }
 
 
+  List<FriendRequestInfo> pendingFriendList = [];
+
+  void fetchPendingFriends() async {
+    var userDoc = await FirebaseFirestore.instance.collection('users').doc(widget.uID).get();
+    var pendingFriends = userDoc.data()?["pendingFriends"] as List<dynamic>?;
+    List<FriendRequestInfo> tempPendingList = [];
+    for (var friendUID in pendingFriends!) {
+      var username = await fetchFriendUsername(friendUID);
+      // print('Adding to tempPendingList: ${FriendRequestInfo(friendUID, username).runtimeType}');
+      tempPendingList.add(FriendRequestInfo(friendUID, username));
+    }
+    setState(() {
+      pendingFriendList = tempPendingList;
+    });
+  }
+
+  Future<String> fetchFriendUsername(String friendID) async {
+    final DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(friendID).get();
+    final data = userDoc.data() as Map<String, dynamic>;
+    return data['username'];
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchPendingFriends();
   }
 
   @override
@@ -205,13 +239,17 @@ class _AddFriendState extends State<AddFriend> {
                       color: Colors.black),
                 ),
                 Expanded(
-                  child: ListView(
-                    children: const [
-                      FriendRequest(),
-                      FriendRequest(),
-                      FriendRequest(),
-                      FriendRequest()
-                    ],
+                  child: RefreshIndicator(
+                    onRefresh: () async {
+                      fetchPendingFriends();
+                    },
+                    child: ListView.builder(
+                      itemCount: pendingFriendList.length,
+
+                      itemBuilder: (context, index) {
+                        return FriendRequest(friendInfo: pendingFriendList[index], uID: widget.uID, fetchPendingFriends: fetchPendingFriends);
+                      },
+                    ),
                   ),
                 )
               ]),
@@ -224,11 +262,15 @@ class _AddFriendState extends State<AddFriend> {
 }
 
 class FriendRequest extends StatelessWidget {
-  final String username;
+  final FriendRequestInfo friendInfo;
+  final String uID;
+  final Function fetchPendingFriends;
 
   const FriendRequest({
     super.key,
-    this.username = "Username",
+    required this.friendInfo,
+    required this.uID,
+    required this.fetchPendingFriends
   });
 
   @override
@@ -248,7 +290,7 @@ class FriendRequest extends StatelessWidget {
           Expanded(
             child: Center(
               child: Text(
-                username,
+                friendInfo.username,
                 style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -260,7 +302,19 @@ class FriendRequest extends StatelessWidget {
             margin: const EdgeInsets.only(right: 20),
             child: ElevatedButton(
               onPressed: () {
-                // Handle the button press
+                // Handle the button press for accepting friend request
+                FirebaseFirestore.instance.collection('users').doc(uID).update({
+                  'friends': FieldValue.arrayUnion([friendInfo.uid])
+                });
+                FirebaseFirestore.instance.collection('users').doc(friendInfo.uid).update({
+                  'friends': FieldValue.arrayUnion([uID])
+                }); // This adds the current users id to the pendingFriends list of the friend
+
+                FirebaseFirestore.instance.collection('users').doc(uID).update({
+                  'pendingFriends': FieldValue.arrayRemove([friendInfo.uid])
+                });
+                fetchPendingFriends();
+
               },
               style: ElevatedButton.styleFrom(
                 side: const BorderSide(width: 4, color: Colors.black),
@@ -285,7 +339,11 @@ class FriendRequest extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () {
-              // Handle the button press
+              // Handle the button press for declining friend request
+              FirebaseFirestore.instance.collection('users').doc(uID).update({
+                'pendingFriends': FieldValue.arrayRemove([friendInfo.uid])
+              });
+              fetchPendingFriends();
             },
             style: ElevatedButton.styleFrom(
               side: const BorderSide(width: 4, color: Colors.black),
