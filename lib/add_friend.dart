@@ -64,6 +64,27 @@ class _AddFriendState extends State<AddFriend> {
     }
   }
 
+  void showMyDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Adding friend error'),
+          content: Text("Friend not found or already added as friend or is the current user."),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Dismiss the dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
   /// Adds a friend to the current user's friends list.
   ///
   /// This does not notify the friend that they have been added.
@@ -77,7 +98,8 @@ class _AddFriendState extends State<AddFriend> {
       }); // This adds the current users id to the pendingFriends list of the friend
     }
     else{
-      print("Friend not found or already added as friend or is the current user.");
+      print("User not found or already added as friend or is the current user.");
+      showMyDialog();
     }
     setState(() {
       currentFriendField = "";
@@ -231,6 +253,14 @@ class _AddFriendState extends State<AddFriend> {
             child: Container(
               margin: const EdgeInsets.only(top: 30),
               child: Column(children: [
+                const Text(
+                  "Pull down on the area below the friend requests text box to refresh the list of pending friend requests.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                ),
                 const Text(
                   "Friend Requests",
                   style: TextStyle(

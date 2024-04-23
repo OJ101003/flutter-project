@@ -343,6 +343,14 @@ class MainPage extends StatelessWidget {
             ],
           ),
         ),
+        const Text(
+          "Pull down to refresh friends list",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white),
+        ),
         Expanded(
           child: RefreshIndicator(
             onRefresh: () async {

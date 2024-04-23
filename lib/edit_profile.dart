@@ -2,9 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:now_me/utils.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EditProfile extends StatefulWidget {
   const EditProfile({super.key});
@@ -14,13 +12,11 @@ class EditProfile extends StatefulWidget {
 }
 
 class _EditProfileState extends State<EditProfile> {
+  String newUsername = '';
 
-  Uint8List? _image;
-
-  void selectImage() async{
-    Uint8List img = await pickImage(ImageSource.gallery);
+  void updateUsernameField(String value) {
     setState(() {
-      _image = img;
+      newUsername = value;
     });
   }
 
@@ -32,6 +28,32 @@ class _EditProfileState extends State<EditProfile> {
       }
     } catch (error) {
       print("Sign out error: $error");
+    }
+  }
+
+  void deleteAccount() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser?.uid;
+      if (user == null) return; // Return if there's no user logged in.
+      await FirebaseFirestore.instance.collection('users').doc(user).delete();
+      await FirebaseAuth.instance.currentUser?.delete();
+      if (mounted) { // Check if the widget is still in the widget tree
+        Navigator.pushReplacementNamed(context, '/');
+      }
+    } catch (e) {
+      print("Error deleting account: $e");
+    }
+  }
+
+  void updateUsername(String newUsername) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser?.uid;
+      if (user == null) return; // Return if there's no user logged in.
+      await FirebaseFirestore.instance.collection('users').doc(user).update({
+        'username': newUsername,
+      });
+    } catch (e) {
+      print("Error updating status: $e");
     }
   }
 
@@ -74,45 +96,14 @@ class _EditProfileState extends State<EditProfile> {
       ),
       body: Column(children: [
         Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           // This is row for current pfp and upload new pfp
           children: [
             Container(
-              margin: const EdgeInsets.only(left: 15, top: 20, right: 20),
+              margin: const EdgeInsets.only(top: 10),
               child: const CircleAvatar(
                 backgroundImage: AssetImage('assets/images/9.jpg'),
-                radius: 50,
-              ),
-            ),
-            Container(
-              margin: const EdgeInsets.only(top: 20),
-              child: ElevatedButton(
-                onPressed: () {
-                  selectImage();
-                },
-                style: ElevatedButton.styleFrom(
-                  side: const BorderSide(width: 4, color: Colors.black),
-                  backgroundColor: const Color(0xFF6452AE),
-                  // Button background color
-                  foregroundColor: Colors.white,
-                  // Text color
-                  elevation: 2,
-                  // Button shadow elevation
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30), // Rounded shape
-                  ),
-                  minimumSize: const Size(150, 40),
-                  // Set the button's minimum size
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 25,
-                      vertical: 10), // Inner padding of the button
-                ),
-                child: const Text(
-                  'Change Profile Picture',
-                  style: TextStyle(
-                    fontSize: 19, // Set the font size
-                    fontWeight: FontWeight.bold, // Set the font weight
-                  ),
-                ),
+                radius: 60,
               ),
             ),
           ],
@@ -121,33 +112,46 @@ class _EditProfileState extends State<EditProfile> {
           // Current username textbox
           children: [
             Container(
-              margin: const EdgeInsets.only(top: 20),
+              // margin: const EdgeInsets.only(top: 10),
               padding:
-                  const EdgeInsets.symmetric(horizontal: 10.0, vertical: 20),
+                  const EdgeInsets.symmetric(horizontal: 10.0, vertical: 15),
               // Add padding around the text field if needed
-              child: TextField(
-                style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black),
-                textAlign: TextAlign.center,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.grey[300],
-                  // Background color of the text field
-                  hintText: 'Current Username',
-                  hintStyle: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black),
-                  // Placeholder text
-                  border: outlineInputBorder,
-                  enabledBorder: outlineInputBorder,
-                  focusedBorder: outlineInputBorder,
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 25.0,
-                      vertical: 25.0), // Padding inside the text field
-                ),
+              child: Column(
+                children: [
+                  const Text(
+                    "Username change reflected on next login",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.yellow),
+                  ),
+                  TextField(
+                    onChanged: (value) => updateUsernameField(value),
+                    style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black),
+                    textAlign: TextAlign.center,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.grey[300],
+                      // Background color of the text field
+                      hintText: 'New Username',
+                      hintStyle: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black),
+                      // Placeholder text
+                      border: outlineInputBorder,
+                      enabledBorder: outlineInputBorder,
+                      focusedBorder: outlineInputBorder,
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 25.0,
+                          vertical: 25.0), // Padding inside the text field
+                    ),
+                  ),
+                ],
               ),
             )
           ],
@@ -157,6 +161,7 @@ class _EditProfileState extends State<EditProfile> {
           children: [
             ElevatedButton(
               onPressed: () {
+                updateUsername(newUsername);
                 // Handle the button press
               },
               style: ElevatedButton.styleFrom(
@@ -187,49 +192,13 @@ class _EditProfileState extends State<EditProfile> {
           ],
         ),
         Column(
-          // Change password box
-          children: [
-            Container(
-              margin: const EdgeInsets.only(top: 20),
-              child: ElevatedButton(
-                onPressed: () {
-                  // Handle the button press
-                },
-                style: ElevatedButton.styleFrom(
-                  side: const BorderSide(width: 4, color: Colors.black),
-                  backgroundColor: const Color(0xFF9D52AE),
-                  // Button background color
-                  foregroundColor: Colors.white,
-                  // Text color
-                  elevation: 2,
-                  // Button shadow elevation
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20), // Rounded shape
-                  ),
-                  minimumSize: const Size(150, 40),
-                  // Set the button's minimum size
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 25,
-                      vertical: 10), // Inner padding of the button
-                ),
-                child: const Text(
-                  'Change Password',
-                  style: TextStyle(
-                    fontSize: 24, // Set the font size
-                    fontWeight: FontWeight.bold, // Set the font weight
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-        Column(
           // Delete account username
           children: [
             Container(
               margin: const EdgeInsets.only(top: 60),
               child: ElevatedButton(
                 onPressed: () {
+                  deleteAccount();
                   // Handle the button press
                 },
                 style: ElevatedButton.styleFrom(

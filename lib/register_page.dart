@@ -226,20 +226,23 @@ class CreateAccountButton extends StatelessWidget {
     }
 
     return ElevatedButton(
-      onPressed: () {
+      onPressed: () async {
         // Create account button
         if (checkPassword()) {
-          FirebaseAuth.instance
+          await FirebaseAuth.instance
               .createUserWithEmailAndPassword(email: email, password: password)
               .then((UserCredential userCredential) {
             String? uid = userCredential.user?.uid; // User UID from Firebase
             // We want to store the user's UID in the database alongside the username
             addUser(uid, email, username);
+            Navigator.pushReplacementNamed(context, '/');
             print("The user's UID is: $uid");
-          }).catchError((error) {
+          }
+          ).catchError((error) {
             print(error);
           });
         }
+
          Navigator.pushReplacementNamed(context, '/');
       },
       style: ElevatedButton.styleFrom(

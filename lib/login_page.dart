@@ -12,6 +12,15 @@ class _LoginPageState extends State<LoginPage> {
   String email = '';
   String password = '';
 
+  @override
+  void initState() {
+    super.initState();
+    // Immediately executed async function.
+    () async {
+      signIn();
+    }(); // Note the parentheses to call this anonymous async function.
+  }
+
   void signIn() async {
     try {
       print('Signing in');
@@ -28,6 +37,9 @@ class _LoginPageState extends State<LoginPage> {
         print('No user found for that email.');
       } else if (e.code == 'wrong-password') {
         print('Wrong password provided for that user.');
+      }
+      else {
+        print(e.code);
       }
     }
   }
@@ -49,6 +61,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (FirebaseAuth.instance.currentUser != null) {
+        print("Already signed in");
         Navigator.pushReplacementNamed(context, '/main');
       }
     });
@@ -131,25 +144,6 @@ class _LoginPageState extends State<LoginPage> {
                         // Add padding around the text field if needed
                         child: PasswordTextField(outlineInputBorder: outlineInputBorder, updatePassword: updatePassword, password: password),
                       )))
-                    ],
-                  ),
-                  Row(
-                    // Forgot password
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          // Handle the button press
-                        },
-                        child: const Text(
-                          'Forgot Password?',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 20, // Set the font size
-                            fontWeight: FontWeight.bold, // Set the font weight
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ],

@@ -56,7 +56,7 @@ class _CreateStatusState extends State<CreateStatus> {
           child: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.black, size: 28),
             // Adjust icon size and color
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.pop(context, statusName),
           ),
         ),
         title: const Text(

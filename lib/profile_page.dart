@@ -164,7 +164,13 @@ class _ProfilePageState extends State<ProfilePage> {
                     context,
                     MaterialPageRoute(
                         builder: (context) => const CreateStatus()),
-                  );
+                  ).then((result){
+                    if(result != null){
+                      setState(() {
+                        buttonLabels.add(result as String);
+                      });
+                    }
+                  });
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF6452AE),
