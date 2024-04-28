@@ -146,9 +146,6 @@ class _RegisterPageState extends State<RegisterPage> {
                 ],
               ),
             ),
-            // What I'm thinking is maybe we have another variable as password, and then we can have a function that checks if the password and confirm password are the same.
-            // That function will be in the confirmPassword textfield, and we detect onchange for the confirm password textfield and then call the function to check if the passwords are the same.
-            // If they are the same, then we can enable the create account button, if not, then we disable the create account button and make the textbox border red.
             Expanded(
               child: Align(
                 alignment: Alignment.topCenter,
@@ -235,15 +232,50 @@ class CreateAccountButton extends StatelessWidget {
             String? uid = userCredential.user?.uid; // User UID from Firebase
             // We want to store the user's UID in the database alongside the username
             addUser(uid, email, username);
-            Navigator.pushReplacementNamed(context, '/');
+            // Navigator.pushReplacementNamed(context, '/');
+            AlertDialog alert = AlertDialog(
+              title: const Text("Account Created"),
+              content: const Text("Your account has been created. Please log in."),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text("OK"),
+                ),
+              ],
+            );
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return alert;
+              },
+            );
             print("The user's UID is: $uid");
           }
           ).catchError((error) {
+            AlertDialog alert = AlertDialog(
+              title: const Text("Error"),
+              content: Text("An error occurred: $error"),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text("OK"),
+                ),
+              ],
+            );
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return alert;
+              },
+            );
             print(error);
           });
         }
 
-         Navigator.pushReplacementNamed(context, '/');
       },
       style: ElevatedButton.styleFrom(
         side: BorderSide(width: 4, color: setColor()),
