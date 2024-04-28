@@ -167,7 +167,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   ).then((result){
                     if(result != null){
                       setState(() {
-                        buttonLabels.add(result as String);
+                        if(result as String != ""){
+                          buttonLabels.add(result);
+                        }
                       });
                     }
                   });
