@@ -29,7 +29,7 @@ if (keystorePropertiesFile.exists()) {
 }
 android {
 
-    namespace "com.omarjaber.nowMe.nowMe"
+    namespace "com.example.now_me.now_me"
     compileSdkVersion flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 
